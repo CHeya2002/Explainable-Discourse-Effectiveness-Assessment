@@ -1,0 +1,22 @@
+# Core data processing
+numpy==2.4.3
+pandas==3.0.2
+scipy==1.17.1
+scikit-learn==1.8.0
+
+# Deep learning and Transformers
+torch==2.5.1
+transformers==4.41.2
+datasets==4.8.5
+accelerate==1.13.0
+
+# Explainable AI
+lime==0.2.0.1
+captum==0.9.0
+
+# Visualization
+matplotlib==3.10.9
+
+# Utilities
+tqdm==4.67.3
+requests==2.33.1
