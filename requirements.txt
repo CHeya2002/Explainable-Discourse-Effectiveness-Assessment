@@ -4,11 +4,12 @@ pandas==3.0.2
 scipy==1.17.1
 scikit-learn==1.8.0
 
-# Deep learning and Transformers
+# Deep Learning and Transformers
 torch==2.5.1
 transformers==4.41.2
 datasets==4.8.5
 accelerate==1.13.0
+sentencepiece
 
 # Explainable AI
 lime==0.2.0.1
@@ -16,6 +17,10 @@ captum==0.9.0
 
 # Visualization
 matplotlib==3.10.9
+seaborn
+
+# File export
+openpyxl
 
 # Utilities
 tqdm==4.67.3
