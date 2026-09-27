@@ -1,146 +1,204 @@
-\# Explainable Discourse Effectiveness Assessment
+# Explainable Discourse Effectiveness Assessment
 
+This repository contains the implementation associated with a research framework for **explainable discourse effectiveness assessment in student argumentative writing**.
 
+The framework combines Transformer-based discourse classification, Explainable Artificial Intelligence (XAI), and rule-guided narrative generation to support both predictive assessment and interpretable communication of model decisions.
 
-This repository contains the implementation of an explainable NLP framework
+## Overview
 
-for discourse effectiveness assessment in student argumentative writing.
+The final experimental pipeline consists of four main stages:
 
+1. **Data Preprocessing and Integration**  
+   Preparation, cleaning, integration, and partitioning of the discourse-level dataset.
 
+2. **Discourse Effectiveness Classification**  
+   Fine-tuning DeBERTa for three-class discourse effectiveness classification.
 
-\## Overview
+3. **Explainable AI**  
+   Generation of local token-level explanations using LIME and Integrated Gradients.
 
+4. **Narrative-Based Explanation**  
+   Transformation of model predictions and XAI evidence into educational narratives using a rule-guided storytelling framework and a locally deployed language model.
 
+## Repository Structure
 
-The framework combines discourse-level classification, explainable artificial
+```text
+Explainable-Discourse-Effectiveness-Assessment/
+│
+├── src/
+│   ├── 01_data_preprocessing_and_merging.py
+│   ├── 02_deberta_classification.py
+│   ├── 03_xai_lime_integrated_gradients.py
+│   └── 04_storytelling_generation.py
+│
+├── data/
+│   └── README.md
+│
+├── figures/
+│   └── README.md
+│
+├── .gitignore
+├── requirements.txt
+└── README.md
+```
 
-intelligence (XAI), and narrative-based explanation to provide both predictive
+The `src/` directory contains the final implementation used to represent the experimental pipeline. Intermediate development notebooks and experimental iterations are not included.
 
-assessment and interpretable feedback.
+## Dataset
 
-
-
-The experimental pipeline consists of four main stages:
-
-
-
-1\. Data preprocessing and dataset integration
-
-2\. Discourse effectiveness classification using DeBERTa
-
-3\. Local explanation using LIME and Integrated Gradients
-
-4\. Educational storytelling generation
-
-
-
-\## Repository Structure
-
-
-
-notebooks/
-
-├── 01\_data\_preprocessing\_and\_merging.ipynb
-
-├── 02\_deberta\_classification.ipynb
-
-├── 03\_xai\_lime\_integrated\_gradients.ipynb
-
-└── 04\_storytelling\_generation.ipynb
-
-
-
-\## Dataset
-
-
-
-The experiments are based on the PERSUADE corpus for discourse-level
-
-analysis of student argumentative writing.
-
-
+The experiments are based on the **PERSUADE corpus**, which contains argumentative writing produced by students and discourse-level annotations.
 
 The classification task considers three discourse effectiveness labels:
 
+- **Ineffective**
+- **Adequate**
+- **Effective**
 
+The repository does not redistribute the original dataset. Dataset acquisition and preparation information is provided in `data/README.md`.
 
-\- Ineffective
+Local dataset files are excluded from version control.
 
-\- Adequate
+## Data Splitting
 
-\- Effective
+To reduce information leakage between partitions, the data are divided at the essay level rather than independently at the discourse-segment level.
 
+The final experimental partition follows approximately:
 
+- **70% training**
+- **10% validation**
+- **20% testing**
 
-Seven discourse types are considered: Position, Claim, Evidence,
+The preprocessing and splitting procedure is implemented in:
 
-Counterclaim, Rebuttal, Concession, and Concluding Summary.
+```text
+src/01_data_preprocessing_and_merging.py
+```
 
+## Classification Model
 
+The final classifier is based on **DeBERTa-v3-base** and predicts one of the three discourse effectiveness classes.
 
-\## Classification Model
+The training strategy includes mechanisms for handling class imbalance and controlling overfitting, including:
 
+- weighted focal loss;
+- learning-rate scheduling;
+- weight decay;
+- gradient clipping;
+- early stopping;
+- validation-based model selection.
 
+The classification implementation is provided in:
 
-DeBERTa is fine-tuned for three-class discourse effectiveness classification.
+```text
+src/02_deberta_classification.py
+```
 
-The training strategy addresses class imbalance and model generalization
+Trained model checkpoints are not stored in this repository.
 
-through weighted focal loss and regularization techniques.
+## Explainable AI
 
+Two complementary post-hoc explanation methods are applied to the trained classifier:
 
+- **LIME (Local Interpretable Model-agnostic Explanations)** for local surrogate-based token importance;
+- **Integrated Gradients (IG)** for gradient-based attribution with respect to the model output.
 
-\## Explainable AI
+The resulting explanations provide token-level evidence for interpreting individual model predictions.
 
+The implementation is provided in:
 
+```text
+src/03_xai_lime_integrated_gradients.py
+```
 
-Two complementary post-hoc explanation methods are used:
+## Narrative-Based Explanation
 
+The final stage transforms model predictions, class probabilities, XAI evidence, assessment information, and an engine-controlled narrative structure into natural-language educational explanations.
 
+Narratives are generated locally using:
 
-\- \*\*LIME\*\* for local surrogate-based feature attribution.
+- **Ollama**
+- **Qwen2.5 7B**
 
-\- \*\*Integrated Gradients (IG)\*\* for gradient-based token attribution.
+The language model is used for narrative realization, while the supplied rule-guided structure constrains the information and evidence used during generation.
 
+The implementation is provided in:
 
+```text
+src/04_storytelling_generation.py
+```
 
-Their explanations are additionally compared to examine agreement between
+For the final public pipeline, the storytelling stage expects a prepared input file:
 
-local explanation methods.
+```text
+data/storytelling_inputs.json
+```
 
+This file represents the final engine-controlled input supplied to the narrative-generation stage. Intermediate storytelling development stages are not included in the repository.
 
+## Installation
 
-\## Narrative-Based Explanation
+Python 3.11 is recommended.
 
+Create and activate a virtual environment, then install the required Python dependencies:
 
+```bash
+pip install -r requirements.txt
+```
 
-Model predictions and XAI evidence are transformed into structured
+The main dependencies include PyTorch, Transformers, pandas, scikit-learn, LIME, Captum, Matplotlib, and related utilities.
 
-natural-language explanations through a rule-guided storytelling pipeline.
+## Local LLM Setup
 
-The objective is to communicate model behavior in a form that is more
+Narrative generation requires a local Ollama installation and the Qwen2.5 7B model.
 
-accessible to non-technical educational users.
+After installing Ollama, obtain the required model with:
 
+```bash
+ollama pull qwen2.5:7b
+```
 
+The storytelling script communicates with the local Ollama service through:
 
-\## Article
+```text
+http://localhost:11434
+```
 
+If the local model is unavailable, the implementation contains a deterministic fallback mechanism.
 
+## Running the Pipeline
 
-This repository contains the implementation associated with the research
+The final source-code stages are organized in execution order:
 
-article on explainable discourse effectiveness assessment and
+```bash
+python src/01_data_preprocessing_and_merging.py
+python src/02_deberta_classification.py
+python src/03_xai_lime_integrated_gradients.py
+python src/04_storytelling_generation.py
+```
 
-narrative-based communication of AI explanations.
+Some stages require their corresponding local data, trained-model, or prepared storytelling inputs. These files are intentionally excluded from version control where appropriate.
 
+Generated outputs and trained models are also excluded from Git tracking.
 
+## Reproducibility
 
-\## Status
+The repository provides the final source implementation of the experimental framework while excluding:
 
+- original dataset files;
+- trained model checkpoints;
+- generated experimental outputs;
+- local LLM model files;
+- intermediate development notebooks;
+- intermediate storytelling-development stages.
 
+This organization is intended to expose the final methodology and implementation associated with the research work without distributing external datasets or large generated artifacts.
 
-The repository is currently under development. Additional documentation,
+## Research Article
 
-experimental results, and reproducibility instructions will be added.
+This repository accompanies research on **explainable discourse effectiveness assessment and narrative-based communication of AI explanations**.
 
+The overall framework investigates how Transformer-based discourse classification can be combined with local explainability methods and structured narrative generation to make model decisions more accessible in an educational context.
+
+## Status
+
+The repository contains the final source-code pipeline associated with the research implementation. Documentation and reproducibility information may be updated alongside the corresponding research article.
