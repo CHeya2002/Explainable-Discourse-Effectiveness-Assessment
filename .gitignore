@@ -3,6 +3,7 @@
 # ============================================
 __pycache__/
 *.py[cod]
+*$py.class
 
 # ============================================
 # Jupyter Notebook
@@ -35,13 +36,27 @@ models/
 *.pth
 
 # ============================================
-# Local datasets
+# Local datasets and intermediate data
 # ============================================
+
+# Files directly inside data/
 data/*.csv
 data/*.xlsx
 data/*.xls
 data/*.parquet
 data/*.json
+
+# Files inside data subdirectories
+data/**/*.csv
+data/**/*.xlsx
+data/**/*.xls
+data/**/*.parquet
+data/**/*.json
+
+# ============================================
+# Generated pipeline outputs
+# ============================================
+outputs/
 
 # ============================================
 # Generated / temporary files
@@ -57,7 +72,8 @@ temp/
 *.gguf
 
 # ============================================
-# Windows / OS files
+# Windows / macOS files
 # ============================================
 Thumbs.db
 .DS_Store
+desktop.ini
